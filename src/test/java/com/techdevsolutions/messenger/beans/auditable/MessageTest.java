@@ -16,7 +16,7 @@ public class MessageTest {
         item.setCreated(123L);
         item.setFrom("123");
         item.setTo("456");
-        item.setText("test message");
+        item.setMessage("test message");
         return item;
     }
 

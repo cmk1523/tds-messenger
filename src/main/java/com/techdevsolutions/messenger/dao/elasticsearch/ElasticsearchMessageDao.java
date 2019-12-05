@@ -3,6 +3,7 @@ package com.techdevsolutions.messenger.dao.elasticsearch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.techdevsolutions.common.beans.elasticsearchCommonSchema.Event;
+import com.techdevsolutions.common.beans.geo.GeoLocation;
 import com.techdevsolutions.common.dao.DaoCrudInterface;
 import com.techdevsolutions.common.dao.elasticsearch.events.EventElasticsearchDAO;
 import com.techdevsolutions.common.service.core.Timer;
@@ -12,6 +13,10 @@ import com.techdevsolutions.messenger.beans.MessageCreatedEvent;
 import com.techdevsolutions.messenger.beans.MessageRemovedEvent;
 import com.techdevsolutions.messenger.beans.auditable.Message;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +24,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class ElasticsearchMessageDao implements DaoCrudInterface<Message> {
@@ -80,7 +86,15 @@ public class ElasticsearchMessageDao implements DaoCrudInterface<Message> {
             Event event = this.dao.getEventByEventDataIdLazy(id, MessageEvent.CATEGORY, MessageEvent.DATASET);
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new Jdk8Module());
-            MessageEvent MessageEvent = objectMapper.convertValue(event, MessageEvent.class);
+            Map<String, Object> itemAsMap = objectMapper.convertValue(event, Map.class);
+            Map<String, Object> data = (Map<String, Object>) itemAsMap.get("data");
+
+            if (data.get("location") != null) {
+                String location = (String) data.get("location");
+                data.put("location", GeoLocation.fromLatLonString(location));
+            }
+
+            MessageEvent MessageEvent = objectMapper.convertValue(itemAsMap, MessageEvent.class);
 
             if (MessageEvent.getAction().equals(EventElasticsearchDAO.ACTION_REMOVED)) {
                 throw new Exception(("Item has been removed"));
@@ -152,5 +166,36 @@ public class ElasticsearchMessageDao implements DaoCrudInterface<Message> {
 
     public Boolean verifyRemoval(final String id) throws Exception {
         return this.dao.verifyRemoval(id, MessageEvent.CATEGORY, MessageEvent.DATASET);
+    }
+
+    @Override
+    public void setupIndex() throws Exception {
+        CreateIndexRequest request = new CreateIndexRequest(ElasticsearchMessageDao.INDEX_BASE_NAME);
+//        request.settings(Settings.builder()
+//                .put("index.number_of_shards", 3)
+//                .put("index.number_of_replicas", 2)
+//        );
+        request.mapping(
+                "{\n" +
+                        "      \"properties\" : {\n" +
+                        "        \"event\" : {\n" +
+                        "          \"properties\" : {\n" +
+                        "            \"data\" : {\n" +
+                        "              \"properties\" : {\n" +
+                        "                \"location\" : {\n" +
+                        "                  \"type\" : \"geo_point\"\n" +
+                        "                },\n" +
+                        "                \"message\" : {\n" +
+                        "                  \"type\" : \"text\"\n" +
+                        "                }\n" +
+                        "              }\n" +
+                        "            }\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      }\n" +
+                        "}",
+                XContentType.JSON);
+        CreateIndexResponse createIndexResponse = this.dao.getClient().indices().create(request, RequestOptions.DEFAULT);
+
     }
 }

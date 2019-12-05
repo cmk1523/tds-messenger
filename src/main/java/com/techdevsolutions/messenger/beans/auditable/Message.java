@@ -6,7 +6,6 @@ import com.techdevsolutions.common.beans.geo.GeoLocation;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -18,7 +17,7 @@ public class Message extends Auditable implements Serializable {
     private String from = "";
 
     @NotBlank
-    private String text = "";
+    private String message = "";
 
     @NotNull
     private Optional<String> key = Optional.empty();
@@ -35,7 +34,7 @@ public class Message extends Auditable implements Serializable {
         return "Message{" +
                 "to='" + to + '\'' +
                 ", from='" + from + '\'' +
-                ", text='" + text + '\'' +
+                ", message='" + message + '\'' +
                 ", key=" + key +
                 ", location=" + location +
                 "} " + super.toString();
@@ -49,7 +48,7 @@ public class Message extends Auditable implements Serializable {
         Message message = (Message) o;
         return Objects.equals(to, message.to) &&
                 Objects.equals(from, message.from) &&
-                Objects.equals(text, message.text) &&
+                Objects.equals(this.message, message.message) &&
                 Objects.equals(key, message.key) &&
                 Objects.equals(location, message.location);
     }
@@ -57,7 +56,7 @@ public class Message extends Auditable implements Serializable {
     @Override
     public int hashCode() {
 
-        return Objects.hash(super.hashCode(), to, from, text, key, location);
+        return Objects.hash(super.hashCode(), to, from, message, key, location);
     }
 
     public Optional<GeoLocation> getLocation() {
@@ -96,12 +95,12 @@ public class Message extends Auditable implements Serializable {
         return this;
     }
 
-    public String getText() {
-        return text;
+    public String getMessage() {
+        return message;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
 }
