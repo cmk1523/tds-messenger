@@ -17,8 +17,8 @@ import java.util.UUID;
 
 public class MessageServiceImpl implements MessageService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private DaoCrudInterface<Message> dao;
-    private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    protected DaoCrudInterface<Message> dao;
+    protected Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     public MessageServiceImpl(DaoCrudInterface<Message> dao) {
         this.dao = dao;
@@ -35,7 +35,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Message get(String id) throws Exception {
+    public Message get(final String id) throws Exception {
         Timer timer = new Timer().start();
 
         if (StringUtils.isEmpty(id)) {
@@ -48,7 +48,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Message create(Message item) throws Exception {
+    public Message create(final Message item) throws Exception {
         Timer timer = new Timer().start();
 
         if (item != null) {
@@ -73,7 +73,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void remove(String id) throws Exception {
+    public void remove(final String id) throws Exception {
         Timer timer = new Timer().start();
 
         if (StringUtils.isEmpty(id)) {
@@ -87,12 +87,12 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void delete(String id) throws Exception {
+    public void delete(final String id) throws Exception {
         this.remove(id);
     }
 
     @Override
-    public Message update(Message item) throws Exception {
+    public Message update(final Message item) throws Exception {
         Timer timer = new Timer().start();
 
         Set<ConstraintViolation<Message>> violations = this.validator.validate(item);

@@ -39,7 +39,7 @@ public class ElasticsearchMessageDao implements DaoCrudInterface<Message> {
         this.dao = new EventElasticsearchDAO("localhost", ElasticsearchMessageDao.INDEX_BASE_NAME);
 
         if (environment != null) {
-            String elasticsearchHost = environment.getProperty("messagedao.elasticsearch.host");
+            String elasticsearchHost = environment.getProperty("message.dao.elasticsearch.host");
 
             if (StringUtils.isNotEmpty(elasticsearchHost)) {
                 this.dao = new EventElasticsearchDAO(elasticsearchHost, ElasticsearchMessageDao.INDEX_BASE_NAME);

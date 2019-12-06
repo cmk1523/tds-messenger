@@ -17,6 +17,7 @@ public class MessageTest {
         item.setFrom("123");
         item.setTo("456");
         item.setMessage("test message");
+        item.getTags().add("test");
         return item;
     }
 

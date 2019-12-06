@@ -29,6 +29,7 @@ public class ElasticsearchMessageDaoIntegrationTestV2 {
         item1.setFrom("123");
         item1.setTo("456");
         item1.setMessage("hey. are you there?");
+        item1.getTags().add("test-v2");
         item1.setLocation(Optional.of(new GeoLocation(12.34, 23.45)));
 
         Message item2 = new Message();
@@ -37,6 +38,7 @@ public class ElasticsearchMessageDaoIntegrationTestV2 {
         item2.setFrom("456");
         item2.setTo("123");
         item2.setMessage("hey! yes i am.");
+        item1.getTags().add("test-v2");
         item2.setLocation(Optional.of(new GeoLocation(56.78, 67.89)));
 
         try {

@@ -1,6 +1,7 @@
 package com.techdevsolutions.messenger.service;
 
 import com.techdevsolutions.common.dao.elasticsearch.events.EventElasticsearchDAO;
+import com.techdevsolutions.common.service.core.AESEncryptionService;
 import com.techdevsolutions.messenger.beans.auditable.Message;
 import com.techdevsolutions.messenger.beans.auditable.MessageTest;
 import com.techdevsolutions.messenger.dao.elasticsearch.ElasticsearchMessageDao;
@@ -20,11 +21,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MessageServiceImplIntegrationTest {
+public class MessageEncryptedServiceImplTest {
     private ElasticsearchMessageDao dao = new ElasticsearchMessageDao(null);
-    private MessageServiceImpl messageService = new MessageServiceImpl(this.dao);
+    private MessageEncryptedServiceImpl messageService = new MessageEncryptedServiceImpl(null, this.dao);
     private EventElasticsearchDAO eventElasticsearchDAO =
             new EventElasticsearchDAO("localhost", ElasticsearchMessageDao.INDEX_BASE_NAME);
+    protected AESEncryptionService encryptionService = new AESEncryptionService();
+    protected String ENCRYPTION_KEY = "8bUCjrgig7RyR08h6HAf";
 
     private List<String> ids = new ArrayList<>();
 
@@ -79,19 +82,13 @@ public class MessageServiceImplIntegrationTest {
         }
     }
 
-//    @Test
-//    public void search() {
-//    }
-//
-//    @Test
-//    public void getAll() {
-//    }
-
     @Test
     public void get() throws Exception {
         Message item = MessageTest.GenerateTestMessage();
         item.setCreated(null);
         Message created = this.messageService.create(item);
+        String decrypted = this.encryptionService.decrypt(created.getMessage(), ENCRYPTION_KEY);
+        created.setMessage(decrypted);
         this.ids.add(created.getId());
         Assert.assertTrue(StringUtils.isNotEmpty(created.getId()));
         Message verify = this.messageService.get(created.getId());
@@ -99,47 +96,31 @@ public class MessageServiceImplIntegrationTest {
     }
 
 //    @Test
-//    public void create() throws Exception {
-//        // same as get()
-//    }
-
-    @Test
-    public void remove() throws Exception {
-        Message message = MessageTest.GenerateTestMessage();
-        Message created = this.messageService.create(message);
-        this.ids.add(created.getId());
-        this.messageService.remove(message.getId());
-//        this.eventElasticsearchDAO.verifyRemoval(Message.getId(), MessageEvent.CATEGORY, MessageEvent.DATASET);
-//
-//        try {
-//            this.messageService.get(created.getId());
-//            Assert.assertTrue(false);
-//        } catch (Exception e) {
-//            Assert.assertTrue(e.getMessage().contains("Item has been removed"));
-//        }
-    }
-
-//    @Test
-//    public void delete() {
-//        // same as remove()
+//    public void create() {
 //    }
 
     @Test
     public void update() throws Exception {
         Message item = MessageTest.GenerateTestMessage();
         Message created = this.messageService.create(item);
+        String decrypted = this.encryptionService.decrypt(created.getMessage(), ENCRYPTION_KEY);
+        created.setMessage(decrypted);
         this.ids.add(created.getId());
         Assert.assertTrue(item.equals(created));
 
         created.setName("test new name");
         Message updated = this.messageService.update(created);
-//        this.eventElasticsearchDAO.verifyUpdate(Message.getId(), MessageEvent.CATEGORY, MessageEvent.DATASET);
-//
-//        Message verify = this.messageService.get(created.getId());
-//        Assert.assertTrue(created.equals(verify));
     }
 
-//    @Test
-//    public void install() {
-//    }
+    @Test
+    public void encryptMessage() {
+    }
+
+    @Test
+    public void encryptMessage1() {
+    }
+
+    @Test
+    public void decryptMessage() {
+    }
 }
